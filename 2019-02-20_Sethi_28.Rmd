@@ -20,6 +20,8 @@ Load useful packages.
 ```{r}
 library(dplyr)
 library(stringr)
+library(readr)
+library(FuzzyDateJoin)
 ```
 
 Load useful globals and functions.
@@ -33,7 +35,7 @@ source("~/Desktop/helpers.R")
 
 ## Get Data
 
-Get UMMAP IDs of interest to data requestor.
+### Get UMMAP IDs of interest
 ```{r}
 reqd_ids <- readxl::read_excel("MADC_data_query.xlsx") %>% 
   # keep only distinct UM IDs
@@ -43,6 +45,7 @@ reqd_ids <- readxl::read_excel("MADC_data_query.xlsx") %>%
   # extract the four relevant digits of the UM ID
   mutate(ptid = str_replace(ptid, "^hlp17umm0", "")) %>%
   mutate(ptid = str_replace(ptid, "_\\d{5}$", "")) %>% 
+  # prepend "UM0000" to four relevant digits of UM ID
   mutate(ptid = str_glue("UM0000{ptid}", ptid = ptid)) %>% 
   # keep only IDs with pattern `UMxxxxxxxx`
   filter(str_detect(ptid, "^UM\\d{8}$")) %>%
@@ -54,15 +57,282 @@ reqd_ids <- readxl::read_excel("MADC_data_query.xlsx") %>%
   sort()
 ```
 
-Define relevant data fields and/or REDCap forms.
-```{r}
+### Get NIH Toolbox data
 
+```{r}
+df_tb <- 
+  read_csv(
+    file = "./TB_renormed.csv",
+    col_types = cols(
+      .default        = col_double()
+      , subject_id    = col_character()
+      , PIN           = col_character()
+      , tb_admin_date = col_datetime(format = "%m/%d/%y")
+      , Language      = col_character()
+      , Age           = col_integer()
+      , Gender        = col_integer()
+      , Race          = col_integer()
+      , Ethnic        = col_integer()
+      , Education     = col_integer()
+    )) %>% 
+  rename(
+    ptid      = subject_id
+    , tb_date = tb_admin_date
+  ) %>% 
+  select(
+    -Language
+    , -Age
+    , -Gender
+    , -Race
+    , -Ethnic
+    , -Education
+  )
+
+# Remove columns without any data
+df_tb_keep_cols <- purrr::map_lgl(df_tb, ~ any(!is.na(.x)) )
+df_tb <- df_tb[, df_tb_keep_cols]
 ```
 
+### Get CogState data
+
+```{r}
+df_cs <- 
+  read_csv(
+    file = "./cogstate_complete.csv",
+    col_types = cols(
+      .default     = col_double()
+      , subject_id = col_character()
+      , BDate      = col_date(format = "%Y-%m-%d")
+      , BYear      = col_integer()
+      , Hand       = col_character()
+      , Sex        = col_character()
+      , Educ       = col_character()
+      , TDate      = col_date(format = "%Y-%m-%d")
+      , TTime      = col_datetime()
+    )) %>% 
+  rename(
+    ptid      = subject_id
+    , cs_date = TDate
+  ) %>% 
+  select(
+    -BDate
+    , -BYear
+    , -Hand
+    , -Sex
+    , -Educ
+    , -TTime
+  )
+
+# Remove columns without any data
+df_cs_keep_cols <- purrr::map_lgl(df_cs, ~ any(!is.na(.x)) )
+df_cs <- df_cs[, df_cs_keep_cols]
+```
+
+### Define relevant data fields
+
+#### UDS 3
+
+* Age (DOB)
+* Sex
+* UDS Dx
+* MoCA (total)
+
+```{r}
+# Form Header (IVP)
+fields_u3_hd_raw <-
+  c(
+    "ptid"
+    , "form_date"
+    , "dob"       # for deriving age
+  )
+# Form A1 (IVP, FVP, TVP)
+fields_u3_a1_raw <-
+  c(
+    "sex"
+  ) %>% c(., paste0("fu_", .), paste0("tele_", .))
+
+# Form C2 (IVP, FVP)
+fields_u3_c2_raw <-
+  c(
+    "mocatots"
+  ) %>% c(., paste0("fu_", .))
+
+# Form D1 (IVP, FVP, TVP)
+fields_u3_d1_raw <-
+  c(
+    "normcog"    # NL
+    , "mciamem"  # MCI
+    , "mciaplus" # MCI
+    , "mcinon1"  # MCI
+    , "mcinon2"  # MCI
+    , "impnomci" # Impaired not MCI
+    , "alzdis"   # AD etio
+    , "alzdisif"
+    , "lbdis"    # LBD etio
+    , "lbdif"
+    , "msa"      # MSA etio
+    , "msaif"
+    , "psp"      # PSP etio
+    , "pspif"
+    , "ftldmo"   # FTLD motor etio
+    , "ftldmoif"
+    , "ftldnos"  # FTLD NOS etio
+    , "ftldnoif"
+  ) %>% c(., paste0("fu_", .), paste0("tele_", .))
+
+# Combine and collapse fields
+fields_u3_raw <-
+  c(
+    fields_u3_hd_raw
+    , fields_u3_a1_raw
+    , fields_u3_c2_raw
+    , fields_u3_d1_raw
+  )
+
+fields_u3 <- fields_u3_raw %>% paste(collapse = ",")
+```
+
+### Retrieve data via REDCAP API
+
+#### UDS 3
+
+```{r}
+json_u3 <- rc_api_get(uri    = REDCAP_API_URI,
+                      token  = REDCAP_API_TOKEN_UDS3n,
+                      fields = fields_u3)
+```
+
+```{r}
+df_u3 <- jsonlite::fromJSON(json_u3) %>% na_if("")
+```
 
 ## Process Data
 
+### Clean data
+
+#### UDS 3
+
+```{r}
+df_u3_cln <- df_u3 %>% 
+  # deselect useless field(s)
+  select(-redcap_event_name) %>% 
+  # remove DDE records (--1, --2)
+  filter(str_detect(ptid, "^UM\\d{8}$")) %>% 
+  # remove missing `form_date`s
+  filter(!is.na(form_date)) %>% 
+  # keep only UM IDs identified by data requestor
+  filter(ptid %in% reqd_ids)
+```
+
+#### NIH Toolbox
+
+```{r}
+df_tb_cln <- df_tb %>% 
+  # Deselect useless field(s)
+  select(-PIN) %>% 
+  # clean out missing UM IDs
+  filter(!is.na(ptid)) %>% 
+  # clean out missing `tb_date`s
+  filter(!is.na(tb_date)) %>% 
+  # keep only UMMAP IDs
+  filter(str_detect(ptid, "^UM\\d{8}$"))
+```
+
+#### CogState
+
+```{r}
+df_cs_cln <- df_cs %>% 
+  # clean out missing UM IDs
+  filter(!is.na(ptid)) %>% 
+  # clean out missing `cs_date`s
+  filter(!is.na(cs_date)) %>% 
+  # keep only UMMAP IDs
+  filter(str_detect(ptid, "^UM\\d{8}$"))
+```
+
+### Mutate data
+
+#### UDS 3
+
+```{r}
+df_u3_cln_mut <- df_u3_cln %>% 
+  # coerce `form_date` to date
+  mutate(form_date = as.Date(form_date)) %>% 
+  # coalesce IVP/FVP/TVP fields
+  coalesce_ift_cols() %>% 
+  # simplify UDS diagnosis / etiology fields
+  mutate(uds_dx_der = case_when(
+    ftldnos  == 1 & ftldnoif == 1 ~ "FTLD",
+    ftldmo   == 1 & ftldmoif == 1 ~ "FTLD",
+    psp      == 1 & pspif    == 1 ~ "PSP",
+    msa      == 1 & msaif    == 1 ~ "MSA",
+    lbdis    == 1 & lbdif    == 1 ~ "LBD",
+    alzdis   == 1 & alzdisif == 1 ~ "AD",
+    impnomci == 1 ~ "Impaired no MCI",
+    mcinon2  == 1 ~ "MCI",
+    mcinon1  == 1 ~ "MCI",
+    mciaplus == 1 ~ "MCI",
+    mciamem  == 1 ~ "MCI",
+    normcog  == 1 ~ "NL",
+    TRUE ~ NA_character_
+  )) %>% 
+  # deselect useless columns
+  select(
+    -normcog,
+    -mciamem, -mciaplus, -mcinon1, -mcinon2,
+    -impnomci,
+    -alzdis, -alzdisif,
+    -lbdis, -lbdif,
+    -msa, -msaif,
+    -psp, -pspif,
+    -ftldmo, -ftldmoif, -ftldnos, -ftldnoif
+  ) %>% 
+  # calculate age
+  calculate_age(dob, form_date) %>% 
+  select(-dob, -age_years, -age_units) %>% 
+  # reorder columns
+  select(ptid, form_date, sex, age_exact, uds_dx_der, everything())
+```
+
+#### NIH Toolbox
+
+```{r}
+df_tb_cln_mut <- df_tb_cln %>% 
+  mutate(tb_date = as.Date(tb_date))
+```
+
+#### CogState
+
+```{r}
+df_cs_cln_mut <- df_cs_cln %>% 
+  mutate(cs_date = as.Date(cs_date))
+```
+
+### Join Data
+
+Left join: df_u3_cln_mut, df_tb_cln, df_cs_cln
+
+```{r}
+df_u3_tb_cs <-
+  outer_left(x = df_u3_cln_mut,        y = df_tb_cln_mut,
+             x_id_col = "ptid",        y_id_col = "ptid",
+             x_date_col = "form_date", y_date_col = "tb_date",
+             x_intvl_less = 120L, x_intvl_more = 120L,
+             keep_y_id = FALSE) %>%
+  rename(ptid = ptid_x) %>% 
+  outer_left(x = .,                    y = df_cs_cln_mut,
+             x_id_col = "ptid",        y_id_col = "ptid",
+             x_date_col = "form_date", y_date_col = "cs_date",
+             x_intvl_less = 120L, x_intvl_more = 120L,
+             keep_y_id = FALSE) %>% 
+  rename(ptid = ptid_x)
+```
+
 ## Write Data
+
+```{r}
+write_csv(df_u3_tb_cs, "df_u3_tb_cs.csv", na = "")
+```
 
 
 # Data Dictionaries
@@ -72,3 +342,32 @@ Define relevant data fields and/or REDCap forms.
 ## Process Data Dictionaries
 
 ## Write Data Dictionaries
+
+
+```{r echo=FALSE}
+###@    #==--  :  --==#    @##==---==##@##==---==##@    #==--  :  --==#    @###
+#==##@    #==-- --==#    @##==---==##@   @##==---==##@    #==-- --==#    @##==#
+#--==##@    #==-==#    @##==---==##@   #   @##==---==##@    #==-==#    @##==--#
+#=---==##@    #=#    @##==---==##@    #=#    @##==---==##@    #=#    @##==---=#
+##==---==##@   #   @##==---==##@    #==-==#    @##==---==##@   #   @##==---==##
+#@##==---==##@   @##==---==##@    #==-- --==#    @##==---==##@   @##==---==##@#
+#  @##==---==##@##==---==##@    EXTRA  :  SPACE    @##==---==##@##==---==##@  #
+#@##==---==##@   @##==---==##@    #==-- --==#    @##==---==##@   @##==---==##@#
+##==---==##@   #   @##==---==##@    #==-==#    @##==---==##@   #   @##==---==##
+#=---==##@    #=#    @##==---==##@    #=#    @##==---==##@    #=#    @##==---=#
+#--==##@    #==-==#    @##==---==##@   #   @##==---==##@    #==-==#    @##==--#
+#==##@    #==-- --==#    @##==---==##@   @##==---==##@    #==-- --==#    @##==#
+###@    #==--  :  --==#    @##==---==##@##==---==##@    #==--  :  --==#    @###
+#==##@    #==-- --==#    @##==---==##@   @##==---==##@    #==-- --==#    @##==#
+#--==##@    #==-==#    @##==---==##@   #   @##==---==##@    #==-==#    @##==--#
+#=---==##@    #=#    @##==---==##@    #=#    @##==---==##@    #=#    @##==---=#
+##==---==##@   #   @##==---==##@    #==-==#    @##==---==##@   #   @##==---==##
+#@##==---==##@   @##==---==##@    #==-- --==#    @##==---==##@   @##==---==##@#
+#  @##==---==##@##==---==##@    EXTRA  :  SPACE    @##==---==##@##==---==##@  #
+#@##==---==##@   @##==---==##@    #==-- --==#    @##==---==##@   @##==---==##@#
+##==---==##@   #   @##==---==##@    #==-==#    @##==---==##@   #   @##==---==##
+#=---==##@    #=#    @##==---==##@    #=#    @##==---==##@    #=#    @##==---=#
+#--==##@    #==-==#    @##==---==##@   #   @##==---==##@    #==-==#    @##==--#
+#==##@    #==-- --==#    @##==---==##@   @##==---==##@    #==-- --==#    @##==#
+###@    #==--  :  --==#    @##==---==##@##==---==##@    #==--  :  --==#    @###
+```
