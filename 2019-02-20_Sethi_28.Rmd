@@ -1,0 +1,74 @@
+---
+title: "Untitled"
+author: "Nicolas May"
+date: "2/26/2019"
+output: 
+  html_document:
+    theme: sandstone
+    highlight: zenburn
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Load Requirements
+
+Load useful packages.
+```{r}
+library(dplyr)
+library(stringr)
+```
+
+Load useful globals and functions.
+```{r}
+source("~/Desktop/config.R")
+source("~/Desktop/helpers.R")
+```
+
+
+# Data
+
+## Get Data
+
+Get UMMAP IDs of interest to data requestor.
+```{r}
+reqd_ids <- readxl::read_excel("MADC_data_query.xlsx") %>% 
+  # keep only distinct UM IDs
+  distinct(`ID Ext`) %>% 
+  # rename the field
+  rename(ptid = `ID Ext`) %>% 
+  # extract the four relevant digits of the UM ID
+  mutate(ptid = str_replace(ptid, "^hlp17umm0", "")) %>%
+  mutate(ptid = str_replace(ptid, "_\\d{5}$", "")) %>% 
+  mutate(ptid = str_glue("UM0000{ptid}", ptid = ptid)) %>% 
+  # keep only IDs with pattern `UMxxxxxxxx`
+  filter(str_detect(ptid, "^UM\\d{8}$")) %>%
+  # df => vector
+  pull() %>% 
+  # coerce to simple character vector
+  as.character() %>% 
+  # sort 
+  sort()
+```
+
+Define relevant data fields and/or REDCap forms.
+```{r}
+
+```
+
+
+## Process Data
+
+## Write Data
+
+
+# Data Dictionaries
+
+## Get Data Dictionaries
+
+## Process Data Dictionaries
+
+## Write Data Dictionaries
