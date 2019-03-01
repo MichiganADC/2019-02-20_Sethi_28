@@ -487,23 +487,74 @@ fields_u3_c2_raw &lt;-
 fields_u3_d1_raw &lt;-
 <span class="st">  </span><span class="kw">c</span>(
     <span class="st">&quot;normcog&quot;</span>    <span class="co"># NL</span>
+    , <span class="st">&quot;demented&quot;</span> <span class="co"># Demented</span>
+    , <span class="st">&quot;amndem&quot;</span>
+    , <span class="st">&quot;pca&quot;</span>
+    , <span class="st">&quot;ppasyn&quot;</span>
+    , <span class="st">&quot;ftdsyn&quot;</span>
+    , <span class="st">&quot;lbdsyn&quot;</span>
+    , <span class="st">&quot;namndem&quot;</span>
     , <span class="st">&quot;mciamem&quot;</span>  <span class="co"># MCI</span>
     , <span class="st">&quot;mciaplus&quot;</span> <span class="co"># MCI</span>
     , <span class="st">&quot;mcinon1&quot;</span>  <span class="co"># MCI</span>
     , <span class="st">&quot;mcinon2&quot;</span>  <span class="co"># MCI</span>
     , <span class="st">&quot;impnomci&quot;</span> <span class="co"># Impaired not MCI</span>
-    , <span class="st">&quot;alzdis&quot;</span>   <span class="co"># AD etio</span>
-    , <span class="st">&quot;alzdisif&quot;</span>
-    , <span class="st">&quot;lbdis&quot;</span>    <span class="co"># LBD etio</span>
-    , <span class="st">&quot;lbdif&quot;</span>
-    , <span class="st">&quot;msa&quot;</span>      <span class="co"># MSA etio</span>
+    , <span class="st">&quot;alzdis&quot;</span>
+    , <span class="st">&quot;alzdisif&quot;</span> 
+    , <span class="st">&quot;lbdis&quot;</span>
+    , <span class="st">&quot;lbdif&quot;</span> 
+    , <span class="st">&quot;msa&quot;</span>
     , <span class="st">&quot;msaif&quot;</span>
-    , <span class="st">&quot;psp&quot;</span>      <span class="co"># PSP etio</span>
+    , <span class="st">&quot;psp&quot;</span>
     , <span class="st">&quot;pspif&quot;</span>
-    , <span class="st">&quot;ftldmo&quot;</span>   <span class="co"># FTLD motor etio</span>
+    , <span class="st">&quot;cort&quot;</span>
+    , <span class="st">&quot;cortif&quot;</span>
+    , <span class="st">&quot;ftldmo&quot;</span> 
     , <span class="st">&quot;ftldmoif&quot;</span>
-    , <span class="st">&quot;ftldnos&quot;</span>  <span class="co"># FTLD NOS etio</span>
+    , <span class="st">&quot;ftldnos&quot;</span>
     , <span class="st">&quot;ftldnoif&quot;</span>
+    , <span class="st">&quot;cvd&quot;</span> 
+    , <span class="st">&quot;cvdif&quot;</span> 
+    , <span class="st">&quot;esstrem&quot;</span>
+    , <span class="st">&quot;esstreif&quot;</span>
+    , <span class="st">&quot;downs&quot;</span> 
+    , <span class="st">&quot;downsif&quot;</span>
+    , <span class="st">&quot;hunt&quot;</span>
+    , <span class="st">&quot;huntif&quot;</span>
+    , <span class="st">&quot;prion&quot;</span>
+    , <span class="st">&quot;prionif&quot;</span>
+    , <span class="st">&quot;brninj&quot;</span>
+    , <span class="st">&quot;brninjif&quot;</span>
+    , <span class="st">&quot;hyceph&quot;</span>
+    , <span class="st">&quot;hycephif&quot;</span>
+    , <span class="st">&quot;epilep&quot;</span> 
+    , <span class="st">&quot;epilepif&quot;</span>
+    , <span class="st">&quot;neop&quot;</span>
+    , <span class="st">&quot;neopif&quot;</span> 
+    , <span class="st">&quot;hiv&quot;</span>
+    , <span class="st">&quot;hivif&quot;</span>
+    , <span class="st">&quot;dep&quot;</span>
+    , <span class="st">&quot;depif&quot;</span> 
+    , <span class="st">&quot;bipoldx&quot;</span>
+    , <span class="st">&quot;bipoldif&quot;</span>
+    , <span class="st">&quot;schizop&quot;</span>
+    , <span class="st">&quot;schizoif&quot;</span>
+    , <span class="st">&quot;anxiet&quot;</span>
+    , <span class="st">&quot;anxietif&quot;</span>
+    , <span class="st">&quot;delir&quot;</span>
+    , <span class="st">&quot;delirif&quot;</span>
+    , <span class="st">&quot;ptsddx&quot;</span>
+    , <span class="st">&quot;ptsddxif&quot;</span>
+    , <span class="st">&quot;othpsy&quot;</span>
+    , <span class="st">&quot;othpsyif&quot;</span>
+    , <span class="st">&quot;alcdem&quot;</span>
+    , <span class="st">&quot;alcdemif&quot;</span>
+    , <span class="st">&quot;impsub&quot;</span>
+    , <span class="st">&quot;impsubif&quot;</span>
+    , <span class="st">&quot;dysill&quot;</span>
+    , <span class="st">&quot;dysillif&quot;</span>
+    , <span class="st">&quot;meds&quot;</span>
+    , <span class="st">&quot;medsif&quot;</span>
   ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">c</span>(., <span class="kw">paste0</span>(<span class="st">&quot;fu_&quot;</span>, .), <span class="kw">paste0</span>(<span class="st">&quot;tele_&quot;</span>, .))
 
 <span class="co"># Combine and collapse fields</span>
@@ -589,20 +640,66 @@ forms_u3 &lt;-<span class="st"> </span>forms_u3_raw <span class="op">%&gt;%</spa
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">form_date =</span> <span class="kw">as.Date</span>(form_date)) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># coalesce IVP/FVP/TVP fields</span>
 <span class="st">  </span><span class="kw">coalesce_ift_cols</span>() <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="co"># simplify UDS diagnosis / etiology fields</span>
+<span class="st">  </span><span class="co"># simplify UDS diagnosis fields</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">uds_dx_der =</span> <span class="kw">case_when</span>(
-    ftldnos  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ftldnoif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;FTLD&quot;</span>,
-    ftldmo   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ftldmoif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;FTLD&quot;</span>,
-    psp      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>pspif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;PSP&quot;</span>,
-    msa      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>msaif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MSA&quot;</span>,
-    lbdis    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>lbdif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;LBD&quot;</span>,
-    alzdis   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>alzdisif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;AD&quot;</span>,
-    impnomci <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Impaired no MCI&quot;</span>,
-    mcinon2  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
-    mcinon1  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
-    mciaplus <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
-    mciamem  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
     normcog  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;NL&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>amndem <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> </span>
+<span class="st">      &quot;Amnestic multidomain dementia syndrome&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>pca <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Posterior cortical atrophy syndrome&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ppasyn <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Primary progressive aphasia (PPA) syndrome&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ftdsyn <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Behavioral variant FTD (bvFTD) syndrome&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>lbdsyn <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Lewy body dementia syndrome&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>namndem <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Non-amnestic multidomain dementia, not PCA, PPA, bvFTD, or DLB syndrome&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>mciamem  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>mciaplus <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>mcinon1  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>mcinon2  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MCI&quot;</span>,
+    demented <span class="op">==</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>impnomci <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Impaired no MCI&quot;</span>,
+    <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="ot">NA_character_</span>
+  )) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="co"># simplify UDS etiology fields</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">uds_prim_etio =</span> <span class="kw">case_when</span>(
+    alzdis   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>alzdisif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;AD&quot;</span>,
+    lbdis    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>lbdif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;LBD&quot;</span>,
+    msa      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>msaif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;MSA&quot;</span>,
+    psp      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>pspif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;PSP&quot;</span>,
+    cort     <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>cortif   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;CBD&quot;</span>,
+    ftldmo   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ftldmoif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;FTLD with motor neuron disease&quot;</span>,
+    ftldnos  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ftldnoif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;FTLD NOS&quot;</span>,
+    cvd      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>cvdif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Vascular brain injury&quot;</span>,
+    esstrem  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>esstreif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Essential tremor&quot;</span>,
+    downs    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>downsif  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Down syndrome&quot;</span>,
+    hunt     <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>huntif   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Huntington's disease&quot;</span>,
+    prion    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>prionif  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Prion disease&quot;</span>,
+    brninj   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>brninjif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Traumatic injury&quot;</span>,
+    hyceph   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>hycephif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Normal-pressure hydrocephalus&quot;</span>,
+    epilep   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>epilepif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Epilepsy&quot;</span>,
+    neop     <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>neopif   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;CNS neoplasm&quot;</span>,
+    hiv      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>hivif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;HIV&quot;</span>,
+    <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="ot">NA_character_</span>
+  )) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="co"># simplify UDS conidtion fields</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">uds_condition =</span> <span class="kw">case_when</span>(
+    dep      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>depif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Active depression&quot;</span>,
+    bipoldx  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>bipoldif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Bipoloar disorder&quot;</span>,
+    schizop  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>schizoif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Schizophrenia&quot;</span>,
+    anxiet   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>anxietif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Anxiety disorder&quot;</span>,
+    delir    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>delirif  <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Delirium&quot;</span>,
+    ptsddx   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>ptsddxif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;PTSD&quot;</span>,
+    othpsy   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>othpsyif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Other psychiatric disease&quot;</span>,
+    alcdem   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>alcdemif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> </span>
+<span class="st">      &quot;Cognitive impairment due to alcohol abuse&quot;</span>,
+    impsub   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>impsubif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> </span>
+<span class="st">      &quot;Cognitive impairment due to other substance abuse&quot;</span>,
+    dysill   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>dysillif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Cognitive impairment due to systemic disease/medical illness&quot;</span>,
+    meds     <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>medsif   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Cognitive impairment due to medications&quot;</span>,
     <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="ot">NA_character_</span>
   )) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># deselect useless columns</span>

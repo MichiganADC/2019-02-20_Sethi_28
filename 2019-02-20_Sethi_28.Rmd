@@ -161,23 +161,74 @@ fields_u3_c2_raw <-
 fields_u3_d1_raw <-
   c(
     "normcog"    # NL
+    , "demented" # Demented
+    , "amndem"
+    , "pca"
+    , "ppasyn"
+    , "ftdsyn"
+    , "lbdsyn"
+    , "namndem"
     , "mciamem"  # MCI
     , "mciaplus" # MCI
     , "mcinon1"  # MCI
     , "mcinon2"  # MCI
     , "impnomci" # Impaired not MCI
-    , "alzdis"   # AD etio
-    , "alzdisif"
-    , "lbdis"    # LBD etio
-    , "lbdif"
-    , "msa"      # MSA etio
+    , "alzdis"
+    , "alzdisif" 
+    , "lbdis"
+    , "lbdif" 
+    , "msa"
     , "msaif"
-    , "psp"      # PSP etio
+    , "psp"
     , "pspif"
-    , "ftldmo"   # FTLD motor etio
+    , "cort"
+    , "cortif"
+    , "ftldmo" 
     , "ftldmoif"
-    , "ftldnos"  # FTLD NOS etio
+    , "ftldnos"
     , "ftldnoif"
+    , "cvd" 
+    , "cvdif" 
+    , "esstrem"
+    , "esstreif"
+    , "downs" 
+    , "downsif"
+    , "hunt"
+    , "huntif"
+    , "prion"
+    , "prionif"
+    , "brninj"
+    , "brninjif"
+    , "hyceph"
+    , "hycephif"
+    , "epilep" 
+    , "epilepif"
+    , "neop"
+    , "neopif" 
+    , "hiv"
+    , "hivif"
+    , "dep"
+    , "depif" 
+    , "bipoldx"
+    , "bipoldif"
+    , "schizop"
+    , "schizoif"
+    , "anxiet"
+    , "anxietif"
+    , "delir"
+    , "delirif"
+    , "ptsddx"
+    , "ptsddxif"
+    , "othpsy"
+    , "othpsyif"
+    , "alcdem"
+    , "alcdemif"
+    , "impsub"
+    , "impsubif"
+    , "dysill"
+    , "dysillif"
+    , "meds"
+    , "medsif"
   ) %>% c(., paste0("fu_", .), paste0("tele_", .))
 
 # Combine and collapse fields
@@ -272,20 +323,66 @@ df_u3_cln_mut <- df_u3_cln %>%
   mutate(form_date = as.Date(form_date)) %>% 
   # coalesce IVP/FVP/TVP fields
   coalesce_ift_cols() %>% 
-  # simplify UDS diagnosis / etiology fields
+  # simplify UDS diagnosis fields
   mutate(uds_dx_der = case_when(
-    ftldnos  == 1 & ftldnoif == 1 ~ "FTLD",
-    ftldmo   == 1 & ftldmoif == 1 ~ "FTLD",
-    psp      == 1 & pspif    == 1 ~ "PSP",
-    msa      == 1 & msaif    == 1 ~ "MSA",
-    lbdis    == 1 & lbdif    == 1 ~ "LBD",
-    alzdis   == 1 & alzdisif == 1 ~ "AD",
-    impnomci == 1 ~ "Impaired no MCI",
-    mcinon2  == 1 ~ "MCI",
-    mcinon1  == 1 ~ "MCI",
-    mciaplus == 1 ~ "MCI",
-    mciamem  == 1 ~ "MCI",
     normcog  == 1 ~ "NL",
+    demented == 1 & amndem == 1 ~ 
+      "Amnestic multidomain dementia syndrome",
+    demented == 1 & pca == 1 ~
+      "Posterior cortical atrophy syndrome",
+    demented == 1 & ppasyn == 1 ~
+      "Primary progressive aphasia (PPA) syndrome",
+    demented == 1 & ftdsyn == 1 ~
+      "Behavioral variant FTD (bvFTD) syndrome",
+    demented == 1 & lbdsyn == 1 ~
+      "Lewy body dementia syndrome",
+    demented == 1 & namndem == 1 ~
+      "Non-amnestic multidomain dementia, not PCA, PPA, bvFTD, or DLB syndrome",
+    demented == 0 & mciamem  == 1 ~ "MCI",
+    demented == 0 & mciaplus == 1 ~ "MCI",
+    demented == 0 & mcinon1  == 1 ~ "MCI",
+    demented == 0 & mcinon2  == 1 ~ "MCI",
+    demented == 0 & impnomci == 1 ~ "Impaired no MCI",
+    TRUE ~ NA_character_
+  )) %>% 
+  # simplify UDS etiology fields
+  mutate(uds_prim_etio = case_when(
+    alzdis   == 1 & alzdisif == 1 ~ "AD",
+    lbdis    == 1 & lbdif    == 1 ~ "LBD",
+    msa      == 1 & msaif    == 1 ~ "MSA",
+    psp      == 1 & pspif    == 1 ~ "PSP",
+    cort     == 1 & cortif   == 1 ~ "CBD",
+    ftldmo   == 1 & ftldmoif == 1 ~ "FTLD with motor neuron disease",
+    ftldnos  == 1 & ftldnoif == 1 ~ "FTLD NOS",
+    cvd      == 1 & cvdif    == 1 ~ "Vascular brain injury",
+    esstrem  == 1 & esstreif == 1 ~ "Essential tremor",
+    downs    == 1 & downsif  == 1 ~ "Down syndrome",
+    hunt     == 1 & huntif   == 1 ~ "Huntington's disease",
+    prion    == 1 & prionif  == 1 ~ "Prion disease",
+    brninj   == 1 & brninjif == 1 ~ "Traumatic injury",
+    hyceph   == 1 & hycephif == 1 ~ "Normal-pressure hydrocephalus",
+    epilep   == 1 & epilepif == 1 ~ "Epilepsy",
+    neop     == 1 & neopif   == 1 ~ "CNS neoplasm",
+    hiv      == 1 & hivif    == 1 ~ "HIV",
+    TRUE ~ NA_character_
+  )) %>% 
+  # simplify UDS conidtion fields
+  mutate(uds_condition = case_when(
+    dep      == 1 & depif    == 1 ~ "Active depression",
+    bipoldx  == 1 & bipoldif == 1 ~ "Bipoloar disorder",
+    schizop  == 1 & schizoif == 1 ~ "Schizophrenia",
+    anxiet   == 1 & anxietif == 1 ~ "Anxiety disorder",
+    delir    == 1 & delirif  == 1 ~ "Delirium",
+    ptsddx   == 1 & ptsddxif == 1 ~ "PTSD",
+    othpsy   == 1 & othpsyif == 1 ~ "Other psychiatric disease",
+    alcdem   == 1 & alcdemif == 1 ~ 
+      "Cognitive impairment due to alcohol abuse",
+    impsub   == 1 & impsubif == 1 ~ 
+      "Cognitive impairment due to other substance abuse",
+    dysill   == 1 & dysillif == 1 ~
+      "Cognitive impairment due to systemic disease/medical illness",
+    meds     == 1 & medsif   == 1 ~
+      "Cognitive impairment due to medications",
     TRUE ~ NA_character_
   )) %>% 
   # deselect useless columns
@@ -297,13 +394,20 @@ df_u3_cln_mut <- df_u3_cln %>%
     -lbdis, -lbdif,
     -msa, -msaif,
     -psp, -pspif,
-    -ftldmo, -ftldmoif, -ftldnos, -ftldnoif
+    -ftldmo, -ftldmoif, -ftldnos, -ftldnoif,
+    -demented,
+    -amndem, -pca, -ppasyn, -ftdsyn, -lbdsyn, 
+    -cvd, -cvdif, -brninj, -brninjif,
+    -dep, -depif, -anxiet, -anxietif, -othpsy, -othpsyif, 
+    -impsub, -impsubif, -dysill, -dysillif, -meds, -medsif
   ) %>% 
   # calculate age
   calculate_age(dob, form_date) %>% 
   select(-dob, -age_years, -age_units) %>% 
   # reorder columns
-  select(ptid, form_date, sex, age_exact, uds_dx_der, everything())
+  select(ptid, form_date, sex, age_exact, 
+         uds_dx_der, uds_prim_etio, uds_condition,
+         everything())
 ```
 
 #### NIH Toolbox
