@@ -376,6 +376,7 @@ div.tocify {
 <span class="st">  </span><span class="co"># extract the four relevant digits of the UM ID</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ptid =</span> <span class="kw">str_replace</span>(ptid, <span class="st">&quot;^hlp17umm0&quot;</span>, <span class="st">&quot;&quot;</span>)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ptid =</span> <span class="kw">str_replace</span>(ptid, <span class="st">&quot;_</span><span class="ch">\\</span><span class="st">d{5}$&quot;</span>, <span class="st">&quot;&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="co"># prepend &quot;UM0000&quot; to four relevant digits of UM ID</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ptid =</span> <span class="kw">str_glue</span>(<span class="st">&quot;UM0000{ptid}&quot;</span>, <span class="dt">ptid =</span> ptid)) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># keep only IDs with pattern `UMxxxxxxxx`</span>
 <span class="st">  </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(ptid, <span class="st">&quot;^UM</span><span class="ch">\\</span><span class="st">d{8}$&quot;</span>)) <span class="op">%&gt;%</span>
@@ -514,7 +515,18 @@ fields_u3_raw &lt;-
     , fields_u3_d1_raw
   )
 
-fields_u3 &lt;-<span class="st"> </span>fields_u3_raw <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;,&quot;</span>)</code></pre></div>
+fields_u3 &lt;-<span class="st"> </span>fields_u3_raw <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;,&quot;</span>)
+
+<span class="co"># Forms Toolbox &amp; CogState</span>
+forms_u3_raw &lt;-
+<span class="st">  </span><span class="kw">c</span>(
+    <span class="co"># &quot;tool_box&quot;</span>
+    <span class="co"># , &quot;cogstate&quot;</span>
+    <span class="st">&quot;ipad_tool_box&quot;</span>
+  )
+
+<span class="co"># Combine and collapse forms</span>
+forms_u3 &lt;-<span class="st"> </span>forms_u3_raw <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;,&quot;</span>)</code></pre></div>
 </div>
 </div>
 <div id="retrieve-data-via-redcap-api" class="section level3">
@@ -523,7 +535,8 @@ fields_u3 &lt;-<span class="st"> </span>fields_u3_raw <span class="op">%&gt;%</s
 <h4>UDS 3</h4>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">json_u3 &lt;-<span class="st"> </span><span class="kw">rc_api_get</span>(<span class="dt">uri    =</span> REDCAP_API_URI,
                       <span class="dt">token  =</span> REDCAP_API_TOKEN_UDS3n,
-                      <span class="dt">fields =</span> fields_u3)</code></pre></div>
+                      <span class="dt">fields =</span> fields_u3,
+                      <span class="dt">forms  =</span> forms_u3)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_u3 &lt;-<span class="st"> </span>jsonlite<span class="op">::</span><span class="kw">fromJSON</span>(json_u3) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">na_if</span>(<span class="st">&quot;&quot;</span>)</code></pre></div>
 </div>
 </div>
@@ -633,9 +646,15 @@ fields_u3 &lt;-<span class="st"> </span>fields_u3_raw <span class="op">%&gt;%</s
 <span class="st">  </span><span class="kw">outer_left</span>(<span class="dt">x =</span> .,                    <span class="dt">y =</span> df_cs_cln_mut,
              <span class="dt">x_id_col =</span> <span class="st">&quot;ptid&quot;</span>,        <span class="dt">y_id_col =</span> <span class="st">&quot;ptid&quot;</span>,
              <span class="dt">x_date_col =</span> <span class="st">&quot;form_date&quot;</span>, <span class="dt">y_date_col =</span> <span class="st">&quot;cs_date&quot;</span>,
-             <span class="dt">x_intvl_less =</span> 120L, <span class="dt">x_intvl_more =</span> 120L,
+             <span class="dt">x_intvl_less =</span> 30L <span class="op">*</span><span class="st"> </span>6L, <span class="dt">x_intvl_more =</span> 30L <span class="op">*</span><span class="st"> </span>6L, <span class="co"># +/- 6 months</span>
              <span class="dt">keep_y_id =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">rename</span>(<span class="dt">ptid =</span> ptid_x)</code></pre></div>
+<p>Clean out the columns that have no data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_u3_tb_cs &lt;-<span class="st"> </span>df_u3_tb_cs <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">select_if</span>(
+    <span class="cf">function</span>(x) {
+      <span class="kw">any</span>(<span class="op">!</span><span class="kw">is.na</span>(x))
+    })</code></pre></div>
 </div>
 </div>
 <div id="write-data" class="section level2">
@@ -647,12 +666,38 @@ fields_u3 &lt;-<span class="st"> </span>fields_u3_raw <span class="op">%&gt;%</s
 <h1>Data Dictionaries</h1>
 <div id="get-data-dictionaries" class="section level2">
 <h2>Get Data Dictionaries</h2>
+<p>Get field names.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">names_df_u3_tb_cs &lt;-<span class="st"> </span><span class="kw">names</span>(df_u3_tb_cs) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">tolower</span>()
+
+<span class="co"># names_df_u3_tb_cs[str_detect(names_df_u3_tb_cs, &quot;_log$&quot;)]</span>
+<span class="co"># names_df_u3_tb_cs[str_detect(names_df_u3_tb_cs, &quot;_raw$&quot;)]</span>
+
+<span class="co"># names_df_u3_tb_cs &lt;- names_df_u3_tb_cs %&gt;% </span>
+<span class="co">#   str_replace(&quot;_log$&quot;, &quot;log&quot;) %&gt;% </span>
+<span class="co">#   str_replace(&quot;_raw$&quot;, &quot;raw&quot;)</span>
+
+<span class="co"># fields_dd &lt;- names_df_u3_tb_cs %&gt;% paste(collapse = &quot;,&quot;)</span>
+<span class="co"># using the `fields` argument in the API call doesn't work for some reason ???</span></code></pre></div>
+<p>Get data dictionary via REDCap API.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">json_dd_u3_tb_cs &lt;-<span class="st"> </span>RCurl<span class="op">::</span><span class="kw">postForm</span>(
+  <span class="dt">uri          =</span> REDCAP_API_URI,
+  <span class="dt">token        =</span> REDCAP_API_TOKEN_UDS3n,
+  <span class="dt">content      =</span> <span class="st">'metadata'</span>,
+  <span class="dt">format       =</span> <span class="st">'json'</span>,
+  <span class="dt">returnFormat =</span> <span class="st">'json'</span>
+)
+
+df_dd_u3_tb_cs &lt;-<span class="st"> </span>jsonlite<span class="op">::</span><span class="kw">fromJSON</span>(json_dd_u3_tb_cs)</code></pre></div>
 </div>
 <div id="process-data-dictionaries" class="section level2">
 <h2>Process Data Dictionaries</h2>
+<p>Keep only relevant fields</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_dd_u3_tb_cs_cln &lt;-<span class="st"> </span>df_dd_u3_tb_cs <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">filter</span>(field_name <span class="op">%in%</span><span class="st"> </span>names_df_u3_tb_cs)</code></pre></div>
 </div>
 <div id="write-data-dictionaries" class="section level2">
 <h2>Write Data Dictionaries</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">readr<span class="op">::</span><span class="kw">write_csv</span>(df_dd_u3_tb_cs_cln, <span class="st">&quot;DataDictionary_UDS3.csv&quot;</span>, <span class="dt">na =</span> <span class="st">&quot;&quot;</span>)</code></pre></div>
 </div>
 </div>
 

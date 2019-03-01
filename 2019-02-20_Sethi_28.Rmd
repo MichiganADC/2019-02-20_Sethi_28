@@ -190,6 +190,17 @@ fields_u3_raw <-
   )
 
 fields_u3 <- fields_u3_raw %>% paste(collapse = ",")
+
+# Forms Toolbox & CogState
+forms_u3_raw <-
+  c(
+    # "tool_box"
+    # , "cogstate"
+    "ipad_tool_box"
+  )
+
+# Combine and collapse forms
+forms_u3 <- forms_u3_raw %>% paste(collapse = ",")
 ```
 
 ### Retrieve data via REDCAP API
@@ -199,7 +210,8 @@ fields_u3 <- fields_u3_raw %>% paste(collapse = ",")
 ```{r}
 json_u3 <- rc_api_get(uri    = REDCAP_API_URI,
                       token  = REDCAP_API_TOKEN_UDS3n,
-                      fields = fields_u3)
+                      fields = fields_u3,
+                      forms  = forms_u3)
 ```
 
 ```{r}
@@ -323,10 +335,21 @@ df_u3_tb_cs <-
   outer_left(x = .,                    y = df_cs_cln_mut,
              x_id_col = "ptid",        y_id_col = "ptid",
              x_date_col = "form_date", y_date_col = "cs_date",
-             x_intvl_less = 120L, x_intvl_more = 120L,
+             x_intvl_less = 30L * 6L, x_intvl_more = 30L * 6L, # +/- 6 months
              keep_y_id = FALSE) %>% 
   rename(ptid = ptid_x)
 ```
+
+Clean out the columns that have no data.
+
+```{r}
+df_u3_tb_cs <- df_u3_tb_cs %>% 
+  select_if(
+    function(x) {
+      any(!is.na(x))
+    })
+```
+
 
 ## Write Data
 
@@ -339,9 +362,50 @@ write_csv(df_u3_tb_cs, "df_u3_tb_cs.csv", na = "")
 
 ## Get Data Dictionaries
 
+Get field names.
+
+```{r}
+names_df_u3_tb_cs <- names(df_u3_tb_cs) %>% tolower()
+
+# names_df_u3_tb_cs[str_detect(names_df_u3_tb_cs, "_log$")]
+# names_df_u3_tb_cs[str_detect(names_df_u3_tb_cs, "_raw$")]
+
+# names_df_u3_tb_cs <- names_df_u3_tb_cs %>% 
+#   str_replace("_log$", "log") %>% 
+#   str_replace("_raw$", "raw")
+
+# fields_dd <- names_df_u3_tb_cs %>% paste(collapse = ",")
+# using the `fields` argument in the API call doesn't work for some reason ???
+```
+
+Get data dictionary via REDCap API.
+
+```{r}
+json_dd_u3_tb_cs <- RCurl::postForm(
+  uri          = REDCAP_API_URI,
+  token        = REDCAP_API_TOKEN_UDS3n,
+  content      = 'metadata',
+  format       = 'json',
+  returnFormat = 'json'
+)
+
+df_dd_u3_tb_cs <- jsonlite::fromJSON(json_dd_u3_tb_cs)
+```
+
 ## Process Data Dictionaries
 
+Keep only relevant fields
+
+```{r}
+df_dd_u3_tb_cs_cln <- df_dd_u3_tb_cs %>% 
+  filter(field_name %in% names_df_u3_tb_cs)
+```
+
 ## Write Data Dictionaries
+
+```{r}
+readr::write_csv(df_dd_u3_tb_cs_cln, "DataDictionary_UDS3.csv", na = "")
+```
 
 
 ```{r echo=FALSE}
