@@ -533,6 +533,8 @@ fields_u3_d1_raw &lt;-
     , <span class="st">&quot;neopif&quot;</span> 
     , <span class="st">&quot;hiv&quot;</span>
     , <span class="st">&quot;hivif&quot;</span>
+    , <span class="st">&quot;othcog&quot;</span>
+    , <span class="st">&quot;othcogif&quot;</span>
     , <span class="st">&quot;dep&quot;</span>
     , <span class="st">&quot;depif&quot;</span> 
     , <span class="st">&quot;bipoldx&quot;</span>
@@ -555,6 +557,8 @@ fields_u3_d1_raw &lt;-
     , <span class="st">&quot;dysillif&quot;</span>
     , <span class="st">&quot;meds&quot;</span>
     , <span class="st">&quot;medsif&quot;</span>
+    , <span class="st">&quot;cogoth&quot;</span>
+    , <span class="st">&quot;cogothif&quot;</span>
   ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">c</span>(., <span class="kw">paste0</span>(<span class="st">&quot;fu_&quot;</span>, .), <span class="kw">paste0</span>(<span class="st">&quot;tele_&quot;</span>, .))
 
 <span class="co"># Combine and collapse fields</span>
@@ -681,6 +685,8 @@ forms_u3 &lt;-<span class="st"> </span>forms_u3_raw <span class="op">%&gt;%</spa
     epilep   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>epilepif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;Epilepsy&quot;</span>,
     neop     <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>neopif   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;CNS neoplasm&quot;</span>,
     hiv      <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>hivif    <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> &quot;HIV&quot;</span>,
+    othcog   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>othcogif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span><span class="st"> </span>
+<span class="st">      &quot;Cognitive impairment due to other conditions&quot;</span>,
     <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="ot">NA_character_</span>
   )) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># simplify UDS conidtion fields</span>
@@ -700,6 +706,8 @@ forms_u3 &lt;-<span class="st"> </span>forms_u3_raw <span class="op">%&gt;%</spa
 <span class="st">      &quot;Cognitive impairment due to systemic disease/medical illness&quot;</span>,
     meds     <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>medsif   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
 <span class="st">      &quot;Cognitive impairment due to medications&quot;</span>,
+    cogoth   <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>cogothif <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">~</span>
+<span class="st">      &quot;Cognitive impairment NOS&quot;</span>,
     <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> </span><span class="ot">NA_character_</span>
   )) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># deselect useless columns</span>
@@ -711,13 +719,20 @@ forms_u3 &lt;-<span class="st"> </span>forms_u3_raw <span class="op">%&gt;%</spa
     <span class="op">-</span>lbdis, <span class="op">-</span>lbdif,
     <span class="op">-</span>msa, <span class="op">-</span>msaif,
     <span class="op">-</span>psp, <span class="op">-</span>pspif,
-    <span class="op">-</span>ftldmo, <span class="op">-</span>ftldmoif, <span class="op">-</span>ftldnos, <span class="op">-</span>ftldnoif
+    <span class="op">-</span>ftldmo, <span class="op">-</span>ftldmoif, <span class="op">-</span>ftldnos, <span class="op">-</span>ftldnoif,
+    <span class="op">-</span>demented,
+    <span class="op">-</span>amndem, <span class="op">-</span>pca, <span class="op">-</span>ppasyn, <span class="op">-</span>ftdsyn, <span class="op">-</span>lbdsyn, 
+    <span class="op">-</span>cvd, <span class="op">-</span>cvdif, <span class="op">-</span>brninj, <span class="op">-</span>brninjif,
+    <span class="op">-</span>dep, <span class="op">-</span>depif, <span class="op">-</span>anxiet, <span class="op">-</span>anxietif, <span class="op">-</span>othpsy, <span class="op">-</span>othpsyif, 
+    <span class="op">-</span>impsub, <span class="op">-</span>impsubif, <span class="op">-</span>dysill, <span class="op">-</span>dysillif, <span class="op">-</span>meds, <span class="op">-</span>medsif
   ) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># calculate age</span>
 <span class="st">  </span><span class="kw">calculate_age</span>(dob, form_date) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>dob, <span class="op">-</span>age_years, <span class="op">-</span>age_units) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="co"># reorder columns</span>
-<span class="st">  </span><span class="kw">select</span>(ptid, form_date, sex, age_exact, uds_dx_der, <span class="kw">everything</span>())</code></pre></div>
+<span class="st">  </span><span class="kw">select</span>(ptid, form_date, sex, age_exact, 
+         uds_dx_der, uds_prim_etio, uds_condition,
+         <span class="kw">everything</span>())</code></pre></div>
 </div>
 <div id="nih-toolbox-1" class="section level4">
 <h4>NIH Toolbox</h4>

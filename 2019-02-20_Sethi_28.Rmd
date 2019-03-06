@@ -207,6 +207,8 @@ fields_u3_d1_raw <-
     , "neopif" 
     , "hiv"
     , "hivif"
+    , "othcog"
+    , "othcogif"
     , "dep"
     , "depif" 
     , "bipoldx"
@@ -229,6 +231,8 @@ fields_u3_d1_raw <-
     , "dysillif"
     , "meds"
     , "medsif"
+    , "cogoth"
+    , "cogothif"
   ) %>% c(., paste0("fu_", .), paste0("tele_", .))
 
 # Combine and collapse fields
@@ -364,6 +368,8 @@ df_u3_cln_mut <- df_u3_cln %>%
     epilep   == 1 & epilepif == 1 ~ "Epilepsy",
     neop     == 1 & neopif   == 1 ~ "CNS neoplasm",
     hiv      == 1 & hivif    == 1 ~ "HIV",
+    othcog   == 1 & othcogif == 1 ~ 
+      "Cognitive impairment due to other conditions",
     TRUE ~ NA_character_
   )) %>% 
   # simplify UDS conidtion fields
@@ -383,6 +389,8 @@ df_u3_cln_mut <- df_u3_cln %>%
       "Cognitive impairment due to systemic disease/medical illness",
     meds     == 1 & medsif   == 1 ~
       "Cognitive impairment due to medications",
+    cogoth   == 1 & cogothif == 1 ~
+      "Cognitive impairment NOS",
     TRUE ~ NA_character_
   )) %>% 
   # deselect useless columns
